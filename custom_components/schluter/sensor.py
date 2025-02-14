@@ -58,10 +58,11 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         for thermostat_id in data.coordinator.data
     )
 
-    async_add_entities(
-        ThermostatSensor(data.coordinator, thermostat_id)
-        for thermostat_id in data.coordinator.data
-    )
+    for energy_type in EnergyCalculationDuration:
+        async_add_entities(
+            ThermostatSensor(data.coordinator, thermostat_id, energy_type)
+            for thermostat_id in data.coordinator.data
+        )
 
 
 class SchluterTargetTemperatureSensor(
