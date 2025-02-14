@@ -10,10 +10,7 @@
   "homekit": {},
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Ingos11/ha-schluter/issues",
-  "requirements": [
-    "aioschluter==0.1.9"
-  ],
   "ssdp": [],
-  "version": "0.2.2",
+  "version": "0.1.22",
   "zeroconf": []
 }

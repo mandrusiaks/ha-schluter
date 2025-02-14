@@ -8,7 +8,7 @@ from typing import Any
 
 from aiohttp import ClientError
 from aiohttp.client_exceptions import ClientConnectorError
-from aioschluter import ApiError, InvalidUserPasswordError, SchluterApi
+from .api import ApiError, InvalidUserPasswordError, SchluterApi
 import voluptuous as vol
 
 from homeassistant import config_entries
