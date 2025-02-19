@@ -63,7 +63,7 @@ class SchluterApi:
         for group in data["Groups"]:
             for tdata in group["Thermostats"]:
                 tstat = Thermostat(tdata)
-                updated_tstat = await self.async_get_energy_usage([tstat])
+                updated_tstat = await self.async_get_energy_usage(tstat)
                 thermostats[tdata["SerialNumber"]] = updated_tstat
         return thermostats
 
@@ -198,7 +198,7 @@ class SchluterApi:
         """test"""
         today = date.today()
         today_param = today.strftime("%d/%m/%Y")
-        params = {"sessionId": self._sessionid, "serialnumber": thermostat.serial_number, "view": "day", "date": today_param, "history": "{DAYS_OF_HISTORY}", "calc": "false", "weekstart": "monday"}
+        params = {"sessionId": self._sessionid, "serialnumber": thermostat.serial_number, "view": "day", "date": today_param, "history": str(DAYS_OF_HISTORY), "calc": "false", "weekstart": "monday"}
         async with self._session.get(API_GET_ENERGY_USAGE_URL, params=params) as resp:
             if resp.status == HTTP_UNAUTHORIZED:
                 raise InvalidSessionIdError(

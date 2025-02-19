@@ -275,12 +275,13 @@ class SchluterEnergyPriceSensor(CoordinatorEntity[DataUpdateCoordinator], Sensor
         """Return the state of the sensor."""
         return self.coordinator.data[self._thermostat_id].kwh_charge
 
+# SchluterTotalEnergySensor
 class ThermostatSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
     """Representation of a sensors"""
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.TOTAL
+    _attr_state_class = SensorStateClass.TOTAL_INCREASING
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
@@ -295,10 +296,8 @@ class ThermostatSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
         self._energy_type = energy_type
         self._attr_unique_id = f"{self._thermostat.serial_number}-{self._energy_type.value}"
         self._attr_suggested_display_precision = 2
-        self._attr_available = True
         self._attr_name = self._get_name(energy_type)
         self._thermostat_id = thermostat_id
-        self._attr_state = self._calculate_energy_usage(energy_type)
 
     @property
     def device_info(self):
@@ -307,15 +306,20 @@ class ThermostatSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
             "identifiers": {(DOMAIN, self._thermostat_id)},
         }
 
-    @property
-    def last_reset(self):
-        return get_todays_midnight()
+    # @property
+    # def last_reset(self):
+    #     return get_todays_midnight()
 
     @property
-    def state(self) -> Optional[str]:
+    def available(self) -> bool:
+        """Return True if Schluter thermostat is available."""
+        return self._thermostat.is_online
+
+    @property
+    def native_value(self) -> float:
         return self._calculate_energy_usage(self._energy_type)
 
-    def _calculate_energy_usage(self, energy_type):
+    def _calculate_energy_usage(self, energy_type) -> float:
         number_of_days = 1
 
         match energy_type:
