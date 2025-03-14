@@ -1,7 +1,7 @@
 """Async Python wrapper to get data from schluter ditra heat thermostats."""
 
 import logging
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 
 from aiohttp import ClientSession
@@ -20,6 +20,7 @@ from .thermostat import DayEnergyUsage, Thermostat
 _LOGGER = logging.getLogger(__name__)
 DAYS_OF_HISTORY = 29 # 29 + today, so 30 days total including today
 
+REGULATION_MODE = 2 # my app shows 2 (maybe that's for Canada?). Original code used 3
 
 class SchluterApi:
     """Main class to perform Schluter API requests."""
@@ -145,12 +146,18 @@ class SchluterApi:
         adjusted_temp = int(temperature * 100)
         params = {"sessionId": sessionid, "serialnumber": serialnumber}
 
+        # original code used ManualTemperature, but when I inspected the request the ComfortTemperature value
+        # was what was changing when I manually modified the value. ManualTemperature matched the value
+        # of the current observed of the temp
+        #
+        # ManualTemperature was also showing some odd values like 2278 when app showed 20.5C.
+        # Looking at schedule values with .5 values, the are never round numbers: ex. 2333, 2778
         async with self._session.post(
             API_SET_THERMOSTAT_URL,
             params=params,
             json={
-                "ManualTemperature": adjusted_temp,
-                "RegulationMode": 3,
+                "ComfortTemperature": adjusted_temp, 
+                "RegulationMode": REGULATION_MODE,
                 "VacationEnabled": False,
             },
         ) as resp:

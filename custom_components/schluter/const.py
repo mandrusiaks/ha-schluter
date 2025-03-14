@@ -7,7 +7,8 @@ PRESET_SCHEDULE = "On Schedule"
 
 """ constants for aioschluter """
 
-API_BASE_URL = "https://ditra-heat-e-wifi.schluter.com"
+# API_BASE_URL = "https://ditra-heat-e-wifi.schluter.com" - original code base url
+API_BASE_URL = "https://mythermostat.info" # my apps api (either worked)
 API_AUTH_URL = API_BASE_URL + "/api/authenticate/user"
 API_GET_THERMOSTATS_URL = API_BASE_URL + "/api/thermostats"
 API_SET_THERMOSTAT_URL = API_BASE_URL + "/api/thermostat"

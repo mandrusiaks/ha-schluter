@@ -139,7 +139,7 @@ class SchluterThermostat(CoordinatorEntity[DataUpdateCoordinator], ClimateEntity
     @property
     def target_temperature(self):
         """Return the temperature we try to reach."""
-        return self.coordinator.data[self._attr_unique_id].set_point_temp
+        return self._attr_target_temperature or self.coordinator.data[self._attr_unique_id].set_point_temp
 
     @property
     def min_temp(self):
@@ -191,21 +191,31 @@ class SchluterThermostat(CoordinatorEntity[DataUpdateCoordinator], ClimateEntity
 
     async def async_set_temperature(self, **kwargs):
         """Set new target temperature."""
+        original_temp = self.current_temperature
         target_temp = kwargs.get(ATTR_TEMPERATURE)
         serial_number = self.coordinator.data[self._attr_unique_id].serial_number
         _LOGGER.debug("Setting thermostat temperature: %s", target_temp)
 
         try:
             if target_temp is not None:
+                # Optimistically update UI
+                self._attr_target_temperature = target_temp
+                self.async_write_ha_state()  # Reflects the change immediately in the UI
+
                 await self._api.async_set_temperature(
                     self._api.sessionid, serial_number, target_temp
                 )
                 # self._attr_hvac_mode = HVACMode.HEAT
                 await self.coordinator.async_request_refresh()
-        except (
-            InvalidUserPasswordError,
-            InvalidSessionIdError,
-        ) as err:
+        except (InvalidUserPasswordError, InvalidSessionIdError) as err:
+            # Revert on failure
+            self._attr_target_temperature = original_temp
+            self.async_write_ha_state()
             raise ConfigEntryAuthFailed from err
         except (ApiError, ClientConnectorError) as err:
+            self._attr_target_temperature = original_temp
+            self.async_write_ha_state()
             raise UpdateFailed(err) from err
+        finally:
+            # Reset to None so future state relies on coordinator data
+            self._attr_target_temperature = None

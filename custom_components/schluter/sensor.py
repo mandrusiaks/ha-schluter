@@ -281,7 +281,7 @@ class ThermostatSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
 
     _attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
     _attr_device_class = SensorDeviceClass.ENERGY
-    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    _attr_state_class = SensorStateClass.TOTAL
     _attr_entity_category = EntityCategory.DIAGNOSTIC
 
     def __init__(
@@ -306,9 +306,9 @@ class ThermostatSensor(CoordinatorEntity[DataUpdateCoordinator], SensorEntity):
             "identifiers": {(DOMAIN, self._thermostat_id)},
         }
 
-    # @property
-    # def last_reset(self):
-    #     return get_todays_midnight()
+    @property
+    def last_reset(self):
+        return get_todays_midnight()
 
     @property
     def available(self) -> bool:
