@@ -11,13 +11,15 @@ class EnergyCalculationDuration(Enum):
 
 class DayEnergyUsage:
     def __init__(self, json):
-        # reverse the hoursly usages because of the way the API returns the data. 
-        # fsr I figured out the beginning of the day is at the end of the array
-        # and the end of the day is at the beginning of the array
-        usage_jsons = json["Usage"].reverse()
+        usage_jsons = json["Usage"]
         hour_usages = []
-        for index, usage_json in enumerate(usage_jsons):
-            hour_usages.append(HourEnergyUsage(usage_json, index))
+
+        if usage_jsons is not None:
+            # reverse the hoursly usages because of the way the API returns the data. 
+            # fsr I figured out the beginning of the day is at the end of the array
+            # and the end of the day is at the beginning of the array
+            for index, usage_json in enumerate(usage_jsons.reverse()):
+                hour_usages.append(HourEnergyUsage(usage_json, index))
 
         self.hour_usages = hour_usages
 
